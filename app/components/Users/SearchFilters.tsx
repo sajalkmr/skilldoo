@@ -17,6 +17,7 @@ export default function SearchFilters({
   isLoading = false 
 }: SearchFiltersProps) {
   const [localQuery, setLocalQuery] = useState(searchQuery)
+  const [availability, setAvailability] = useState('all')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,12 +26,27 @@ export default function SearchFilters({
 
   const handleClear = () => {
     setLocalQuery('')
+    setAvailability('all')
     onClearSearch()
   }
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
       <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4">
+        <div className="flex-shrink-0">
+          <select
+            value={availability}
+            onChange={(e) => setAvailability(e.target.value)}
+            className="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white"
+            disabled={isLoading}
+          >
+            <option value="all">Availability</option>
+            <option value="weekdays">Weekdays</option>
+            <option value="weekends">Weekends</option>
+            <option value="evenings">Evenings</option>
+            <option value="flexible">Flexible</option>
+          </select>
+        </div>
         <div className="flex-1">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -41,7 +57,7 @@ export default function SearchFilters({
               value={localQuery}
               onChange={(e) => setLocalQuery(e.target.value)}
               placeholder="Search by name, location, or skills..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-500 bg-white"
               disabled={isLoading}
             />
           </div>
@@ -53,7 +69,7 @@ export default function SearchFilters({
             disabled={isLoading}
             className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Searching...' : 'Search'}
+            {isLoading ? 'Searching...' : 'search'}
           </button>
           
           {(searchQuery || localQuery) && (

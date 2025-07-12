@@ -29,8 +29,8 @@ export default function UserCard({ user, currentUserId, onRequestClick }: UserCa
   }
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
-      <div className="flex items-start space-x-4">
+    <div className="bg-white shadow-lg rounded-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300 p-6">
+      <div className="flex items-center space-x-4">
         <div className="flex-shrink-0">
           {user.profilePhoto && !imageError ? (
             <img
@@ -49,8 +49,8 @@ export default function UserCard({ user, currentUserId, onRequestClick }: UserCa
         </div>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-start justify-between">
+            <div className="flex-1 min-w-0">
               <h3 className="text-lg font-semibold text-gray-900 truncate">
                 <Link 
                   href={`/users/${user.id}`}
@@ -59,15 +59,16 @@ export default function UserCard({ user, currentUserId, onRequestClick }: UserCa
                   {user.name}
                 </Link>
               </h3>
-              {user.location && (
-                <p className="text-sm text-gray-500 truncate">{user.location}</p>
-              )}
+              <div className="flex items-center space-x-2 mt-1">
+                <span className="text-sm text-gray-500">rating</span>
+                <span className="text-sm font-medium text-gray-900">4.5/5</span>
+              </div>
             </div>
             
             {currentUserId && !isCurrentUser && (
               <button
                 onClick={handleRequestClick}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >
                 Request
               </button>
@@ -77,7 +78,7 @@ export default function UserCard({ user, currentUserId, onRequestClick }: UserCa
           <div className="mt-4 space-y-3">
             {user.offeredSkills.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-gray-600 mb-1">Offers:</p>
+                <p className="text-xs font-medium text-gray-600 mb-1">Skills offered →</p>
                 <div className="flex flex-wrap gap-1">
                   {user.offeredSkills.slice(0, 3).map((skill) => (
                     <span
@@ -98,7 +99,7 @@ export default function UserCard({ user, currentUserId, onRequestClick }: UserCa
             
             {user.wantedSkills.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-gray-600 mb-1">Wants:</p>
+                <p className="text-xs font-medium text-gray-600 mb-1">Skills wanted →</p>
                 <div className="flex flex-wrap gap-1">
                   {user.wantedSkills.slice(0, 3).map((skill) => (
                     <span

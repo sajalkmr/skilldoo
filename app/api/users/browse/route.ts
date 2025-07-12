@@ -9,22 +9,24 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '12')
     const offset = (page - 1) * limit
 
+    // Exclude admin users from public browsing
     let whereClause: any = {
       isActive: true,
-      name: { not: null }
+      name: { not: null },
+      role: { not: 'admin' }
     }
 
     if (search) {
       whereClause = {
         ...whereClause,
         OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { location: { contains: search, mode: 'insensitive' } },
+          { name: { contains: search } },
+          { location: { contains: search } },
           {
             userSkills: {
               some: {
                 skill: {
-                  name: { contains: search, mode: 'insensitive' }
+                  name: { contains: search }
                 }
               }
             }

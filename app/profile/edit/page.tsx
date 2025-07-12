@@ -14,7 +14,7 @@ const profileSchema = z.object({
   location: z.string().optional(),
   profilePhoto: z.string().url().optional().or(z.literal('')),
   availability: z.string().optional(),
-  isPublic: z.string().default('true'),
+  isPublic: z.string(),
 })
 
 type ProfileFormData = z.infer<typeof profileSchema>
@@ -210,44 +210,51 @@ export default function ProfileEditPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-8">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                       Skills Offered
                     </label>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {skillsOffered.map((skill) => (
-                        <span
-                          key={skill}
-                          className="inline-flex items-center bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium"
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex flex-wrap gap-2 mb-4 min-h-[40px]">
+                        {skillsOffered.length > 0 ? (
+                          skillsOffered.map((skill) => (
+                            <span
+                              key={skill}
+                              className="inline-flex items-center bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium"
+                            >
+                              {skill}
+                              <button
+                                type="button"
+                                onClick={() => removeOfferedSkill(skill)}
+                                className="ml-2 text-green-200 hover:text-white transition-colors"
+                              >
+                                <XMarkIcon className="h-4 w-4" />
+                              </button>
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-gray-500 text-sm italic">No skills offered yet</span>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newOfferedSkill}
+                          onChange={(e) => setNewOfferedSkill(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addOfferedSkill())}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+                          placeholder="Add a skill you can offer"
+                        />
+                        <button
+                          type="button"
+                          onClick={addOfferedSkill}
+                          disabled={!newOfferedSkill.trim()}
+                          className="bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium transition-colors"
                         >
-                          {skill}
-                          <button
-                            type="button"
-                            onClick={() => removeOfferedSkill(skill)}
-                            className="ml-2 text-green-200 hover:text-white"
-                          >
-                            <XMarkIcon className="h-4 w-4" />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex space-x-2">
-                      <input
-                        type="text"
-                        value={newOfferedSkill}
-                        onChange={(e) => setNewOfferedSkill(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addOfferedSkill())}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        placeholder="Add skill you offer"
-                      />
-                      <button
-                        type="button"
-                        onClick={addOfferedSkill}
-                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                      >
-                        Add
-                      </button>
+                          Add
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -255,39 +262,46 @@ export default function ProfileEditPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                       Skills Wanted
                     </label>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {skillsWanted.map((skill) => (
-                        <span
-                          key={skill}
-                          className="inline-flex items-center bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium"
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex flex-wrap gap-2 mb-4 min-h-[40px]">
+                        {skillsWanted.length > 0 ? (
+                          skillsWanted.map((skill) => (
+                            <span
+                              key={skill}
+                              className="inline-flex items-center bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium"
+                            >
+                              {skill}
+                              <button
+                                type="button"
+                                onClick={() => removeWantedSkill(skill)}
+                                className="ml-2 text-blue-200 hover:text-white transition-colors"
+                              >
+                                <XMarkIcon className="h-4 w-4" />
+                              </button>
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-gray-500 text-sm italic">No skills wanted yet</span>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={newWantedSkill}
+                          onChange={(e) => setNewWantedSkill(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addWantedSkill())}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+                          placeholder="Add a skill you want to learn"
+                        />
+                        <button
+                          type="button"
+                          onClick={addWantedSkill}
+                          disabled={!newWantedSkill.trim()}
+                          className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-medium transition-colors"
                         >
-                          {skill}
-                          <button
-                            type="button"
-                            onClick={() => removeWantedSkill(skill)}
-                            className="ml-2 text-blue-200 hover:text-white"
-                          >
-                            <XMarkIcon className="h-4 w-4" />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex space-x-2">
-                      <input
-                        type="text"
-                        value={newWantedSkill}
-                        onChange={(e) => setNewWantedSkill(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addWantedSkill())}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        placeholder="Add skill you want"
-                      />
-                      <button
-                        type="button"
-                        onClick={addWantedSkill}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                      >
-                        Add
-                      </button>
+                          Add
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
