@@ -1,6 +1,7 @@
 export interface User {
   id: number
   email: string
+  password: string
   name: string | null
   location: string | null
   profilePhoto: string | null
