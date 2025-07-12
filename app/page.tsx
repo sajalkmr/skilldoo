@@ -1,96 +1,191 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import Layout from './components/Layout/Layout'
+import UserGrid from './components/Users/UserGrid'
+import SearchFilters from './components/Users/SearchFilters'
+import Pagination from './components/Common/Pagination'
+import RequestModal from './components/SwapRequests/RequestModal'
+import { UserProfile, Skill } from './types'
 
 export default function Home() {
+  const [users, setUsers] = useState<UserProfile[]>([])
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [currentUserSkills, setCurrentUserSkills] = useState<{
+    offered: Skill[]
+    wanted: Skill[]
+  }>({ offered: [], wanted: [] })
+  const [isLoading, setIsLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 12,
+    totalCount: 0,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPreviousPage: false
+  })
+  const [requestModal, setRequestModal] = useState<{
+    isOpen: boolean
+    targetUser: UserProfile | null
+  }>({ isOpen: false, targetUser: null })
+  
+  const router = useRouter()
+
+  useEffect(() => {
+    checkAuth()
+    fetchUsers()
+  }, [])
+
+  const checkAuth = async () => {
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
+    
+    if (token && userData) {
+      setCurrentUser(JSON.parse(userData))
+      await fetchCurrentUserSkills()
+    }
+  }
+
+  const fetchCurrentUserSkills = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) return
+
+      const response = await fetch('/api/profile/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setCurrentUserSkills({
+          offered: data.user.offeredSkills || [],
+          wanted: data.user.wantedSkills || []
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching user skills:', error)
+    }
+  }
+
+  const fetchUsers = async (page = 1, search = '') => {
+    setIsLoading(true)
+    
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '12',
+        ...(search && { search })
+      })
+
+      const response = await fetch(`/api/users/browse?${params}`)
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch users')
+      }
+
+      const data = await response.json()
+      setUsers(data.users || [])
+      setPagination(data.pagination || {})
+    } catch (error) {
+      console.error('Error fetching users:', error)
+      toast.error('Failed to load users')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+    setPagination(prev => ({ ...prev, page: 1 }))
+    fetchUsers(1, query)
+  }
+
+  const handleClearSearch = () => {
+    setSearchQuery('')
+    setPagination(prev => ({ ...prev, page: 1 }))
+    fetchUsers(1, '')
+  }
+
+  const handlePageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, page }))
+    fetchUsers(page, searchQuery)
+  }
+
+  const handleRequestClick = (user: UserProfile) => {
+    if (!currentUser) {
+      toast.error('Please sign in to send requests')
+      router.push('/login')
+      return
+    }
+
+    if (currentUserSkills.offered.length === 0) {
+      toast.error('Please add some skills you offer before sending requests')
+      router.push('/profile/edit')
+      return
+    }
+
+    setRequestModal({
+      isOpen: true,
+      targetUser: user
+    })
+  }
+
+  const closeRequestModal = () => {
+    setRequestModal({
+      isOpen: false,
+      targetUser: null
+    })
+  }
+
   return (
     <Layout>
       <div className="bg-gray-50 min-h-screen">
-        <div className="text-center py-16">
-          <h1 className="display-1 text-gray-900 mb-6">
-            Welcome to <span className="text-purple-600">Skilldoo</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
-            A comprehensive skill exchange platform where users can offer their expertise and request skills they want to learn.
-          </p>
-          
-          <div className="bg-white rounded-lg shadow-lg p-8 max-w-3xl mx-auto mb-12">
-            <h2 className="display-3 text-gray-800 mb-6">
-              🎯 System Ready! User Authentication & Profile Management
-            </h2>
-            <div className="text-left space-y-4">
-              <div className="flex items-center space-x-3">
-                <span className="text-green-500 font-bold text-lg">✅</span>
-                <span className="text-gray-700">User registration and login system</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-green-500 font-bold text-lg">✅</span>
-                <span className="text-gray-700">JWT authentication with protected routes</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-green-500 font-bold text-lg">✅</span>
-                <span className="text-gray-700">Profile management with skills system</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-green-500 font-bold text-lg">✅</span>
-                <span className="text-gray-700">Skills tagging (offered/wanted) with colors</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-green-500 font-bold text-lg">✅</span>
-                <span className="text-gray-700">Responsive forms with validation</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-green-500 font-bold text-lg">✅</span>
-                <span className="text-gray-700">Authentication state management</span>
-              </div>
-            </div>
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Discover <span className="text-purple-600">Skilled</span> People
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Find people who can teach you new skills and share your expertise with others.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <div className="bg-purple-50 rounded-lg p-6 border border-purple-100">
-              <h3 className="font-bold text-purple-900 mb-3 text-lg">Try It Out!</h3>
-              <p className="text-purple-700 mb-4">
-                Create an account and set up your profile with skills you can offer and want to learn.
-              </p>
-              <div className="space-y-3">
-                <a
-                  href="/register"
-                  className="block w-full bg-purple-600 hover:bg-purple-700 text-white text-center py-3 px-4 rounded-lg transition-colors font-medium"
-                >
-                  Sign Up Now
-                </a>
-                <a
-                  href="/login"
-                  className="block w-full bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50 text-center py-3 px-4 rounded-lg transition-colors font-medium"
-                >
-                  Sign In
-                </a>
-              </div>
-            </div>
-            
-            <div className="bg-green-50 rounded-lg p-6 border border-green-100">
-              <h3 className="font-bold text-green-900 mb-3 text-lg">What's Next?</h3>
-              <p className="text-green-700 mb-4">
-                Coming soon: user browsing, search functionality, and swap requests.
-              </p>
-              <div className="text-green-700 space-y-2">
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  <span>Browse all users</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  <span>Search by skills</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  <span>Send swap requests</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  <span>Request management</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <SearchFilters
+            onSearch={handleSearch}
+            onClearSearch={handleClearSearch}
+            searchQuery={searchQuery}
+            isLoading={isLoading}
+          />
+
+          <UserGrid
+            users={users}
+            currentUserId={currentUser?.id}
+            isLoading={isLoading}
+            onRequestClick={handleRequestClick}
+          />
+
+          <Pagination
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={handlePageChange}
+            hasNextPage={pagination.hasNextPage}
+            hasPreviousPage={pagination.hasPreviousPage}
+            isLoading={isLoading}
+          />
+
+          {requestModal.isOpen && requestModal.targetUser && (
+            <RequestModal
+              isOpen={requestModal.isOpen}
+              onClose={closeRequestModal}
+              targetUser={requestModal.targetUser}
+              currentUserSkills={currentUserSkills}
+            />
+          )}
         </div>
       </div>
     </Layout>

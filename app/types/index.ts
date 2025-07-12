@@ -14,7 +14,7 @@ export interface Skill {
   id: number
   name: string
   category: string
-  description: string | null
+  description?: string
   createdAt: Date
 }
 
@@ -23,10 +23,10 @@ export interface UserSkill {
   userId: number
   skillId: number
   type: 'offered' | 'wanted'
-  proficiencyLevel: number | null
+  proficiencyLevel?: number
   createdAt: Date
-  user?: User
-  skill?: Skill
+  user: User
+  skill: Skill
 }
 
 export interface SwapRequest {
@@ -36,19 +36,24 @@ export interface SwapRequest {
   skillOffered: number
   skillWanted: number
   status: 'pending' | 'accepted' | 'rejected' | 'completed'
-  message: string | null
+  message?: string
   createdAt: Date
   updatedAt: Date
-  requester?: User
-  provider?: User
-  offeredSkill?: Skill
-  wantedSkill?: Skill
+  requester: User
+  provider: User
+  offeredSkill: Skill
+  wantedSkill: Skill
 }
 
-export interface UserProfile extends User {
-  userSkills: UserSkill[]
+export interface UserProfile {
+  id: number
+  name: string
+  location?: string
+  profilePhoto?: string
   offeredSkills: Skill[]
   wantedSkills: Skill[]
+  skillsCount: number
+  createdAt: Date
 }
 
 export interface SwapRequestWithDetails extends SwapRequest {
