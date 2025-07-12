@@ -14,12 +14,33 @@ export default function Header() {
     checkAuthStatus()
   }, [])
 
-  const checkAuthStatus = () => {
+  const checkAuthStatus = async () => {
     const token = localStorage.getItem('token')
     const userData = localStorage.getItem('user')
     
     if (token && userData) {
-      setUser(JSON.parse(userData))
+      try {
+        // Fetch latest user data from API to get current role
+        const response = await fetch('/api/profile/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          const updatedUser = data.user
+          setUser(updatedUser)
+          // Update localStorage with latest user data including role
+          localStorage.setItem('user', JSON.stringify(updatedUser))
+        } else {
+          // If API call fails, use cached data
+          setUser(JSON.parse(userData))
+        }
+      } catch (error) {
+        // If API call fails, use cached data
+        setUser(JSON.parse(userData))
+      }
     }
     setIsLoading(false)
   }
@@ -59,6 +80,14 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
+                {user.role === 'admin' && (
+                  <Link 
+                    href="/admin" 
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+                  >
+                    Admin Panel
+                  </Link>
+                )}
                 <Link 
                   href="/requests" 
                   className="text-purple-600 hover:text-purple-700 transition-colors font-medium"
@@ -73,6 +102,7 @@ export default function Header() {
                 </Link>
                 <span className="text-gray-600">
                   Welcome, {user.name || user.email}
+                  {user.role === 'admin' && <span className="ml-1 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Admin</span>}
                 </span>
                 <button
                   onClick={handleLogout}

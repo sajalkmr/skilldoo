@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
         name: true,
         location: true,
         profilePhoto: true,
+        role: true,
         createdAt: true,
       }
     })
@@ -58,6 +59,7 @@ export async function POST(request: NextRequest) {
       name: user.name,
       location: user.location,
       profilePhoto: user.profilePhoto,
+      role: user.role,
       createdAt: user.createdAt,
     }
 

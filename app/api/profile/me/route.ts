@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
         availability: true,
         isPublic: true,
         isActive: true,
+        role: true,
         createdAt: true,
         updatedAt: true,
       }

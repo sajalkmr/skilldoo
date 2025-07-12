@@ -26,6 +26,8 @@ model User {
   swapRequestsReceived SwapRequest[] @relation("ProviderUser")
   ratingsGiven         Rating[]      @relation("RatingFrom")
   ratingsReceived      Rating[]      @relation("RatingTo")
+  messagesSent         PlatformMessage[] @relation("MessageAuthor")
+  messagesReceived     UserMessage[]
 
   @@map("users")
 }
@@ -95,4 +97,35 @@ model Rating {
 
   @@unique([swapRequestId, fromUserId])
   @@map("ratings")
+}
+
+model PlatformMessage {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String
+  type        String   @default("info")
+  authorId    Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author       User          @relation("MessageAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  userMessages UserMessage[]
+
+  @@map("platform_messages")
+}
+
+model UserMessage {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  platformMessageId Int
+  isRead           Boolean  @default(false)
+  readAt           DateTime?
+  createdAt        DateTime @default(now())
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  platformMessage PlatformMessage @relation(fields: [platformMessageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platformMessageId])
+  @@map("user_messages")
 }

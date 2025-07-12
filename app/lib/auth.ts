@@ -48,6 +48,7 @@ export async function getCurrentUser(userId: number) {
       location: true,
       profilePhoto: true,
       isActive: true,
+      role: true,
       createdAt: true,
       updatedAt: true,
     }

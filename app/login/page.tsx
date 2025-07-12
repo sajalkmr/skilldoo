@@ -49,7 +49,13 @@ export default function LoginPage() {
       localStorage.setItem('user', JSON.stringify(result.user))
       
       toast.success('Login successful!')
-      router.push('/')
+      
+      // Redirect admin users to admin panel, regular users to home page
+      if (result.user.role === 'admin') {
+        router.push('/admin')
+      } else {
+        router.push('/')
+      }
       
     } catch (error) {
       console.error('Login error:', error)
