@@ -7,6 +7,8 @@ const updateProfileSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
   location: z.string().optional(),
   profilePhoto: z.string().url().optional().nullable(),
+  availability: z.string().optional(),
+  isPublic: z.boolean().optional(),
   skillsOffered: z.array(z.string()).optional(),
   skillsWanted: z.array(z.string()).optional(),
 })
@@ -15,7 +17,7 @@ export async function POST(request: NextRequest) {
   try {
     const authUser = await requireAuth(request)
     const body = await request.json()
-    const { name, location, profilePhoto, skillsOffered, skillsWanted } = updateProfileSchema.parse(body)
+    const { name, location, profilePhoto, availability, isPublic, skillsOffered, skillsWanted } = updateProfileSchema.parse(body)
 
     // Update user basic info
     const updatedUser = await db.user.update({
@@ -24,6 +26,8 @@ export async function POST(request: NextRequest) {
         ...(name && { name }),
         ...(location !== undefined && { location }),
         ...(profilePhoto !== undefined && { profilePhoto }),
+        ...(availability !== undefined && { availability }),
+        ...(isPublic !== undefined && { isPublic }),
       },
       select: {
         id: true,
@@ -31,6 +35,8 @@ export async function POST(request: NextRequest) {
         name: true,
         location: true,
         profilePhoto: true,
+        availability: true,
+        isPublic: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,

@@ -14,6 +14,8 @@ export async function GET(request: NextRequest) {
         name: true,
         location: true,
         profilePhoto: true,
+        availability: true,
+        isPublic: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,

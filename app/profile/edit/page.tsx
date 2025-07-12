@@ -13,6 +13,8 @@ const profileSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   location: z.string().optional(),
   profilePhoto: z.string().url().optional().or(z.literal('')),
+  availability: z.string().optional(),
+  isPublic: z.string().default('true'),
 })
 
 type ProfileFormData = z.infer<typeof profileSchema>
@@ -62,6 +64,8 @@ export default function ProfileEditPage() {
       setValue('name', user.name || '')
       setValue('location', user.location || '')
       setValue('profilePhoto', user.profilePhoto || '')
+      setValue('availability', user.availability || '')
+      setValue('isPublic', user.isPublic ?? true)
 
       setSkillsOffered(user.offeredSkills?.map((skill: any) => skill.name) || [])
       setSkillsWanted(user.wantedSkills?.map((skill: any) => skill.name) || [])
@@ -93,7 +97,7 @@ export default function ProfileEditPage() {
     setSkillsWanted(skillsWanted.filter(skill => skill !== skillToRemove))
   }
 
-  const onSubmit = async (data: ProfileFormData) => {
+  const onSubmit = async (data: any) => {
     setIsLoading(true)
     
     try {
@@ -111,6 +115,7 @@ export default function ProfileEditPage() {
         },
         body: JSON.stringify({
           ...data,
+          isPublic: data.isPublic === 'true',
           skillsOffered,
           skillsWanted,
         }),
@@ -288,23 +293,31 @@ export default function ProfileEditPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="availability" className="block text-sm font-medium text-gray-700 mb-2">
                     Availability
                   </label>
                   <input
+                    {...register('availability')}
                     type="text"
+                    id="availability"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="e.g., weekends"
+                    placeholder="e.g., weekends, evenings"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="isPublic" className="block text-sm font-medium text-gray-700 mb-2">
                     Profile Visibility
                   </label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    <option value="public">Public</option>
-                    <option value="private">Private</option>
+                  <select 
+                    {...register('isPublic', {
+                      setValueAs: (value) => value === 'true'
+                    })}
+                    id="isPublic"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    <option value="true">Public</option>
+                    <option value="false">Private</option>
                   </select>
                 </div>
               </div>

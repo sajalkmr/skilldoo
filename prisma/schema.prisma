@@ -14,13 +14,18 @@ model User {
   name         String?
   location     String?
   profilePhoto String?
+  availability String?
+  isPublic     Boolean  @default(true)
   isActive     Boolean  @default(true)
+  role         String   @default("user")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  userSkills         UserSkill[]
-  swapRequestsSent   SwapRequest[] @relation("RequesterUser")
+  userSkills           UserSkill[]
+  swapRequestsSent     SwapRequest[] @relation("RequesterUser")
   swapRequestsReceived SwapRequest[] @relation("ProviderUser")
+  ratingsGiven         Rating[]      @relation("RatingFrom")
+  ratingsReceived      Rating[]      @relation("RatingTo")
 
   @@map("users")
 }
@@ -62,13 +67,32 @@ model SwapRequest {
   skillWanted  Int
   status       String   @default("pending")
   message      String?
+  completedAt  DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  requester    User  @relation("RequesterUser", fields: [requesterId], references: [id], onDelete: Cascade)
-  provider     User  @relation("ProviderUser", fields: [providerId], references: [id], onDelete: Cascade)
-  offeredSkill Skill @relation("OfferedSkill", fields: [skillOffered], references: [id])
-  wantedSkill  Skill @relation("WantedSkill", fields: [skillWanted], references: [id])
+  requester    User     @relation("RequesterUser", fields: [requesterId], references: [id], onDelete: Cascade)
+  provider     User     @relation("ProviderUser", fields: [providerId], references: [id], onDelete: Cascade)
+  offeredSkill Skill    @relation("OfferedSkill", fields: [skillOffered], references: [id])
+  wantedSkill  Skill    @relation("WantedSkill", fields: [skillWanted], references: [id])
+  ratings      Rating[]
 
   @@map("swap_requests")
+}
+
+model Rating {
+  id            Int      @id @default(autoincrement())
+  swapRequestId Int
+  fromUserId    Int
+  toUserId      Int
+  rating        Int
+  feedback      String?
+  createdAt     DateTime @default(now())
+
+  swapRequest SwapRequest @relation(fields: [swapRequestId], references: [id], onDelete: Cascade)
+  fromUser    User        @relation("RatingFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser      User        @relation("RatingTo", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([swapRequestId, fromUserId])
+  @@map("ratings")
 }

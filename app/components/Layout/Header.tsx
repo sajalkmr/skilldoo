@@ -60,6 +60,12 @@ export default function Header() {
             {user ? (
               <>
                 <Link 
+                  href="/requests" 
+                  className="text-purple-600 hover:text-purple-700 transition-colors font-medium"
+                >
+                  Swap Requests
+                </Link>
+                <Link 
                   href="/profile/edit" 
                   className="text-purple-600 hover:text-purple-700 transition-colors font-medium"
                 >
