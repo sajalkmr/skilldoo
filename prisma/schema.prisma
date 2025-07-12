@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,7 +17,6 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  // Relations
   userSkills         UserSkill[]
   swapRequestsSent   SwapRequest[] @relation("RequesterUser")
   swapRequestsReceived SwapRequest[] @relation("ProviderUser")
@@ -35,7 +31,6 @@ model Skill {
   description String?
   createdAt   DateTime @default(now())
 
-  // Relations
   userSkills      UserSkill[]
   offeredRequests SwapRequest[] @relation("OfferedSkill")
   wantedRequests  SwapRequest[] @relation("WantedSkill")
@@ -47,11 +42,10 @@ model UserSkill {
   id               Int      @id @default(autoincrement())
   userId           Int
   skillId          Int
-  type             String   // 'offered' or 'wanted'
-  proficiencyLevel Int?     // 1-5 scale
+  type             String
+  proficiencyLevel Int?
   createdAt        DateTime @default(now())
 
-  // Relations
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
 
@@ -65,12 +59,11 @@ model SwapRequest {
   providerId   Int
   skillOffered Int
   skillWanted  Int
-  status       String   @default("pending") // 'pending', 'accepted', 'rejected', 'completed'
+  status       String   @default("pending")
   message      String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  // Relations
   requester    User  @relation("RequesterUser", fields: [requesterId], references: [id], onDelete: Cascade)
   provider     User  @relation("ProviderUser", fields: [providerId], references: [id], onDelete: Cascade)
   offeredSkill Skill @relation("OfferedSkill", fields: [skillOffered], references: [id])
