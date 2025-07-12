@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String?
+  location     String?
+  profilePhoto String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  userSkills         UserSkill[]
+  swapRequestsSent   SwapRequest[] @relation("RequesterUser")
+  swapRequestsReceived SwapRequest[] @relation("ProviderUser")
+
+  @@map("users")
+}
+
+model Skill {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  category    String
+  description String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  userSkills      UserSkill[]
+  offeredRequests SwapRequest[] @relation("OfferedSkill")
+  wantedRequests  SwapRequest[] @relation("WantedSkill")
+
+  @@map("skills")
+}
+
+model UserSkill {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  skillId          Int
+  type             String   // 'offered' or 'wanted'
+  proficiencyLevel Int?     // 1-5 scale
+  createdAt        DateTime @default(now())
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId, type])
+  @@map("user_skills")
+}
+
+model SwapRequest {
+  id           Int      @id @default(autoincrement())
+  requesterId  Int
+  providerId   Int
+  skillOffered Int
+  skillWanted  Int
+  status       String   @default("pending") // 'pending', 'accepted', 'rejected', 'completed'
+  message      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  requester    User  @relation("RequesterUser", fields: [requesterId], references: [id], onDelete: Cascade)
+  provider     User  @relation("ProviderUser", fields: [providerId], references: [id], onDelete: Cascade)
+  offeredSkill Skill @relation("OfferedSkill", fields: [skillOffered], references: [id])
+  wantedSkill  Skill @relation("WantedSkill", fields: [skillWanted], references: [id])
+
+  @@map("swap_requests")
+}
