@@ -2,7 +2,7 @@
 
 # skilldoo
 
-## Team - Sajal, Team 1641, sajalkmr@proton.me
+## Team - Sajal, Team 1641
 
 ## Setup
 ```bash
